@@ -3,8 +3,8 @@ import random
 import os
 from PIL import Image, ImageDraw, ImageFont
 from tkinter import simpledialog,messagebox
-from key import access_key
-
+from key import unsplash_key
+from get_quotes import get_quotes
 import tkinter as tk
 
 #select keyword
@@ -13,8 +13,8 @@ category = ['success','inspirational','life','faith','dreams','hope',]
 
 #gen quotes
 random_category = random.choice(category)
-query=random_category#select query from catagory
 
+query = random.choice(category)
 
 #size image
 width = height = 1080  # Size to crop the image to
@@ -42,10 +42,10 @@ class MyGUI:
         self.button1 = tk.Button(self.master, text="Load img",command=lambda:self.load_images())
         self.button2 = tk.Button(self.master, text="Draw Quotes",command=lambda:self.load_text())
         self.button3 = tk.Button(self.master,text ="Open Images",command=lambda:self.open_directory("imgs"))
-        self.button3_5 = tk.Button(self.master,text ="Open Final",command=lambda:self.open_directory("finals"))
+        self.button3_5 = tk.Button(self.master,text ="Open Output",command=lambda:self.open_directory("output"))
         self.buttonall = tk.Button(self.master,text ="Load and Draw",command=lambda:self.load_and_draw())
         self.button4 = tk.Button(self.master, text="Delete img",command=lambda:self.delete_imgs('imgs'))
-        self.button5 = tk.Button(self.master, text="delete draw Quotes",command=lambda:self.delete_imgs('finals'))
+        self.button5 = tk.Button(self.master, text="delete draw Quotes",command=lambda:self.delete_imgs('output'))
         self.button6 = tk.Button(self.master,text ="Delete All",command=lambda:self.delete_all())
 
 
@@ -61,7 +61,7 @@ class MyGUI:
 
     def load_img(self,n):
        
-        url = 'https://api.unsplash.com/photos/random?client_id={}&query={}&orientation=portrait&count={}'.format(access_key, query,n)
+        url = 'https://api.unsplash.com/photos/random?client_id={}&query={}&orientation=portrait&count={}'.format(unsplash_key, query,n)
         response = requests.get(url)
         json_data = response.json()
 
@@ -103,12 +103,10 @@ class MyGUI:
     def draw_text(self,n):
 # loop through all files in folder
         for filename in os.listdir("imgs"):
-            api_url = 'https://api.api-ninjas.com/v1/quotes?category={}'.format(query)
-            response = requests.get(api_url, headers={'X-Api-Key': 'pfBnVykGc1p7g7M1EiW05g==8tUIDmfrwKAvHcDu'})
-            data= response.json()
-            quote = data[0]['quote']
-            author = data[0]['author']
-       
+            quotes = get_quotes()
+            quote = quotes[0]
+            author = quotes[1]
+            
             image = Image.open(os.path.join("imgs", filename))
             background_image = image.resize((width, height))
 
@@ -161,7 +159,7 @@ class MyGUI:
 
 
         # Save the image
-            image.save(f'finals/{filename}.png')
+            image.save(f'output/{filename}.png')
        
            
     def open_directory(self,path):
